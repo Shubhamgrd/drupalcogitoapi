@@ -1,0 +1,61 @@
+<?php
+use Drupal\node\Entity\Node;
+/**
+*Adding the hook cron function
+*
+**/
+
+function drupal_cron_cron() {
+	$storage_handler = \Drupal::entityTypeManager()->getStorage("node");
+$entities = $storage_handler->loadByProperties(["type" => "team"]);
+$storage_handler->delete($entities);
+	$data = file_get_contents('http://delivery.chalk247.com/team_list/NFL.JSON?api_key=74db8efa2a6db279393b433d97c2bc843f8e32b0');
+  	$cat_facts = json_decode($data, TRUE);
+  	$tax_term = array(
+    "American Football Conference" => 1,
+    "East Division" => 3,
+    "National Football Conference" => 2,
+    "North Division" => 4,
+    "South Division" => 5,
+    "West Division" => 6,
+	);
+  foreach ($cat_facts as $cat_fact) 
+  {
+  	/*if (
+  		for ($x = 0; $x <= 100; $x+=1){
+	 		$node = Node::load($cat_fact[data][team][$x][id]);
+			//$node->body->value = 'body';
+ 			$node->field_id = [$cat_fact[data][team][$x][id]];
+ 			$node->field_nickname = [$cat_fact[data][team][$x][division]];
+ 			$node->field_name = [$cat_fact[data][team][$x][division]];
+ 			$node->field_display_name = [$cat_fact[data][team][$x][display_name]];
+ 			$node->field_division = [$cat_fact[data][team][$x][division]];
+ 			$node->field_conference = [$cat_fact[data][team][$x][conference]];
+ 		    $node->save();
+			
+		}
+ 	)
+  	else (*/
+  				//count($cat_fact)
+
+			for ($x = 0; $x <= 100; $x+=1) {
+				// $term = taxonomy_get_term_from_name($cat_fact[data][team][$x][conference], "conference1");
+				// print(key($term));
+				$node = Node::create(array(
+		  		'type' => 'team',
+				'title' => $cat_fact[data][team][$x][display_name],
+		  		'field_id' => $cat_fact[data][team][$x][id],
+		  		'field_nickname' => $cat_fact[data][team][$x][nickname],
+		  		'field_name' => $cat_fact[data][team][$x][name],
+		  		'field_display_name' => $cat_fact[data][team][$x][display_name],
+		  		'field_division' => $cat_fact[data][team][$x][division],
+		  		// 'field_conference' => $cat_fact[data][team][$x][conference],
+		  		
+		  		'field_conference1' => [['target_id' => $tax_term[$cat_fact[data][team][$x][conference]]]],
+			 	'status' => 1,));
+			 	$node->save();
+			}
+		//)
+  }
+}							
+
